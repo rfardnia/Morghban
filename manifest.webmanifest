@@ -1,0 +1,17 @@
+{
+  "name":"مرغبان",
+  "short_name":"مرغبان",
+  "description":"سامانه مدیریت پرورش مرغ گوشتی",
+  "start_url":"./",
+  "scope":"./",
+  "display":"standalone",
+  "display_override":["fullscreen","standalone","minimal-ui"],
+  "background_color":"#ffffff",
+  "theme_color":"#ffffff",
+  "orientation":"any",
+  "lang":"fa",
+  "dir":"rtl",
+  "icons":[
+    {"src":"./icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}
+  ]
+}
