@@ -11,9 +11,14 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import androidx.webkit.WebViewCompat;
+import androidx.webkit.WebViewFeature;
+import java.util.HashSet;
+import java.util.Arrays;
 
 public class MainActivity extends Activity {
   private WebView webView;
+  private static final String LAYOUT_SCRIPT="(function(){function fix(){if(!document.querySelector('.mn-bottom'))return;var old=document.getElementById('morghban-layout-r36');if(old)return;var style=document.createElement('style');style.id='morghban-layout-r36';style.textContent=\"html.morghban-mobile .mn-bottom{top:auto!important;bottom:0!important;height:calc(90px + env(safe-area-inset-bottom))!important;max-height:calc(90px + env(safe-area-inset-bottom))!important;min-height:0!important;grid-template-rows:72px!important;align-content:start!important;overflow:hidden!important;box-sizing:border-box!important;}html.morghban-mobile .mn-bottom-btn{height:72px!important;max-height:72px!important;min-height:0!important;}html.morghban-mobile body.mobile-native .mobile-bottom-nav{display:none!important;}html.morghban-mobile body.mobile-native #saveLogBtn{position:static!important;bottom:auto!important;box-shadow:none!important;}\";document.head.appendChild(style)}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fix);else fix();new MutationObserver(fix).observe(document,{childList:true,subtree:true})})();";
   private static final String URL="https://script.google.com/macros/s/AKfycbxmjAbwy_h2cqUhCeaojDtOuBGJQd5gMsnIjOiZjfG5xMTV2436XYrP8DI5WZ95Zcff/exec";
 
   @Override public void onCreate(Bundle b){
@@ -45,16 +50,15 @@ public class MainActivity extends Activity {
     CookieManager.getInstance().setAcceptCookie(true);
     CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
     webView.setWebChromeClient(new WebChromeClient());
+    if(WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)){
+      WebViewCompat.addDocumentStartJavaScript(webView,LAYOUT_SCRIPT,
+        new HashSet<>(Arrays.asList("https://script.google.com","https://script.googleusercontent.com","https://*.googleusercontent.com")));
+    }
     webView.setWebViewClient(new WebViewClient(){
       @Override public void onPageFinished(WebView view,String url){
         super.onPageFinished(view,url);
-        String js="(function(){try{"+
-          "var old=document.getElementById('morghban-apk-fix');if(old)old.remove();"+
-          "var st=document.createElement('style');st.id='morghban-apk-fix';"+
-          "st.textContent='html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;}body{touch-action:auto!important;}.app,.mobile-native-shell,.mn-content{height:auto!important;min-height:0!important;overflow:visible!important;}.mobile-native-shell{padding-bottom:118px!important;}.mn-content{padding-bottom:120px!important;}.mn-bottom{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:78px!important;max-height:104px!important;overflow:hidden!important;z-index:9999!important;display:grid!important;grid-template-columns:1fr 1fr 1.2fr 1fr!important;background:rgba(255,255,255,.98)!important;}.mn-bottom-btn{pointer-events:auto!important;touch-action:manipulation!important;}button,a,input,select,textarea,[onclick],[role=button]{pointer-events:auto!important;touch-action:manipulation!important;}.drawer-backdrop.hidden,.mn-drawer-backdrop.hidden{display:none!important;pointer-events:none!important;}#modal{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}';"+
-          "document.head.appendChild(st);document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';"+
-          "}catch(e){}})();";
-        view.evaluateJavascript(js,null);
+        // Fallback for WebView versions without document-start injection.
+        view.evaluateJavascript(LAYOUT_SCRIPT,null);
       }
     });
     webView.setOnTouchListener((v,event)->{
