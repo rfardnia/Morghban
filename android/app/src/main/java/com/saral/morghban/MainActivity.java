@@ -2,10 +2,12 @@ package com.saral.morghban;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowInsetsController;
 import android.webkit.CookieManager;
+import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -21,10 +23,17 @@ public class MainActivity extends Activity {
     setContentView(webView);
     fullscreen();
 
+    webView.setClickable(true);
+    webView.setFocusable(true);
+    webView.setFocusableInTouchMode(true);
+    webView.requestFocus(View.FOCUS_DOWN);
+
     WebSettings s=webView.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
     s.setDatabaseEnabled(true);
+    s.setJavaScriptCanOpenWindowsAutomatically(true);
+    s.setSupportMultipleWindows(false);
     s.setSupportZoom(false);
     s.setBuiltInZoomControls(false);
     s.setDisplayZoomControls(false);
@@ -41,25 +50,39 @@ public class MainActivity extends Activity {
     CookieManager.getInstance().setAcceptCookie(true);
     CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
 
+    webView.setWebChromeClient(new WebChromeClient());
+
     webView.setWebViewClient(new WebViewClient(){
       @Override public void onPageFinished(WebView view,String url){
         super.onPageFinished(view,url);
         view.evaluateJavascript(
-          "(function(){"+
-          "try{"+
+          "(function(){try{"+
           "document.documentElement.style.setProperty('overflow-y','auto','important');"+
           "document.documentElement.style.setProperty('height','auto','important');"+
           "document.body.style.setProperty('overflow-y','auto','important');"+
           "document.body.style.setProperty('height','auto','important');"+
           "document.body.style.setProperty('min-height','100vh','important');"+
-          "document.body.style.setProperty('touch-action','pan-y','important');"+
+          "document.body.style.setProperty('touch-action','pan-y manipulation','important');"+
+          "var els=document.querySelectorAll('button,a,input,select,textarea,[onclick],[role=button]');"+
+          "for(var i=0;i<els.length;i++){"+
+          "els[i].style.setProperty('pointer-events','auto','important');"+
+          "els[i].style.setProperty('touch-action','manipulation','important');"+
+          "}"+
           "var s=document.querySelector('.mobile-native-shell');"+
-          "if(s){s.style.setProperty('overflow-y','visible','important');s.style.setProperty('height','auto','important');}"+
+          "if(s){s.style.setProperty('overflow-y','visible','important');s.style.setProperty('height','auto','important');s.style.setProperty('pointer-events','auto','important');}"+
           "var c=document.querySelector('.mn-content');"+
-          "if(c){c.style.setProperty('overflow','visible','important');c.style.setProperty('height','auto','important');}"+
-          "}catch(e){}"+
-          "})();",null);
+          "if(c){c.style.setProperty('overflow','visible','important');c.style.setProperty('height','auto','important');c.style.setProperty('pointer-events','auto','important');}"+
+          "var overlays=document.querySelectorAll('.drawer-backdrop.hidden,.mn-drawer-backdrop.hidden');"+
+          "for(var j=0;j<overlays.length;j++){overlays[j].style.setProperty('pointer-events','none','important');}"+
+          "}catch(e){}})();",null);
       }
+    });
+
+    webView.setOnTouchListener((v,event)->{
+      if(event.getAction()==MotionEvent.ACTION_DOWN || event.getAction()==MotionEvent.ACTION_UP){
+        v.requestFocus();
+      }
+      return false;
     });
 
     if(b==null) webView.loadUrl(URL); else webView.restoreState(b);
