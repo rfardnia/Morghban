@@ -18,16 +18,13 @@ public class MainActivity extends Activity {
 
   @Override public void onCreate(Bundle b){
     super.onCreate(b);
-
     webView=new WebView(this);
     setContentView(webView);
     fullscreen();
-
     webView.setClickable(true);
     webView.setFocusable(true);
     webView.setFocusableInTouchMode(true);
     webView.requestFocus(View.FOCUS_DOWN);
-
     WebSettings s=webView.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
@@ -40,51 +37,30 @@ public class MainActivity extends Activity {
     s.setTextZoom(100);
     s.setLoadWithOverviewMode(false);
     s.setUseWideViewPort(false);
-
     webView.setVerticalScrollBarEnabled(true);
     webView.setHorizontalScrollBarEnabled(false);
     webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
     webView.setNestedScrollingEnabled(true);
     webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
-
     CookieManager.getInstance().setAcceptCookie(true);
     CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
-
     webView.setWebChromeClient(new WebChromeClient());
-
     webView.setWebViewClient(new WebViewClient(){
       @Override public void onPageFinished(WebView view,String url){
         super.onPageFinished(view,url);
-        view.evaluateJavascript(
-          "(function(){try{"+
-          "document.documentElement.style.setProperty('overflow-y','auto','important');"+
-          "document.documentElement.style.setProperty('height','auto','important');"+
-          "document.body.style.setProperty('overflow-y','auto','important');"+
-          "document.body.style.setProperty('height','auto','important');"+
-          "document.body.style.setProperty('min-height','100vh','important');"+
-          "document.body.style.setProperty('touch-action','pan-y manipulation','important');"+
-          "var els=document.querySelectorAll('button,a,input,select,textarea,[onclick],[role=button]');"+
-          "for(var i=0;i<els.length;i++){"+
-          "els[i].style.setProperty('pointer-events','auto','important');"+
-          "els[i].style.setProperty('touch-action','manipulation','important');"+
-          "}"+
-          "var s=document.querySelector('.mobile-native-shell');"+
-          "if(s){s.style.setProperty('overflow-y','visible','important');s.style.setProperty('height','auto','important');s.style.setProperty('pointer-events','auto','important');}"+
-          "var c=document.querySelector('.mn-content');"+
-          "if(c){c.style.setProperty('overflow','visible','important');c.style.setProperty('height','auto','important');c.style.setProperty('pointer-events','auto','important');}"+
-          "var overlays=document.querySelectorAll('.drawer-backdrop.hidden,.mn-drawer-backdrop.hidden');"+
-          "for(var j=0;j<overlays.length;j++){overlays[j].style.setProperty('pointer-events','none','important');}"+
-          "}catch(e){}})();",null);
+        String js="(function(){try{"+
+          "var old=document.getElementById('morghban-apk-fix');if(old)old.remove();"+
+          "var st=document.createElement('style');st.id='morghban-apk-fix';"+
+          "st.textContent='html,body{height:auto!important;min-height:100%!important;overflow-y:auto!important;overflow-x:hidden!important;}body{touch-action:auto!important;}.app,.mobile-native-shell,.mn-content{height:auto!important;min-height:0!important;overflow:visible!important;}.mobile-native-shell{padding-bottom:118px!important;}.mn-content{padding-bottom:120px!important;}.mn-bottom{position:fixed!important;left:0!important;right:0!important;bottom:0!important;top:auto!important;width:100%!important;max-width:100%!important;height:auto!important;min-height:78px!important;max-height:104px!important;overflow:hidden!important;z-index:9999!important;display:grid!important;grid-template-columns:1fr 1fr 1.2fr 1fr!important;background:rgba(255,255,255,.98)!important;}.mn-bottom-btn{pointer-events:auto!important;touch-action:manipulation!important;}button,a,input,select,textarea,[onclick],[role=button]{pointer-events:auto!important;touch-action:manipulation!important;}.drawer-backdrop.hidden,.mn-drawer-backdrop.hidden{display:none!important;pointer-events:none!important;}#modal{overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;}';"+
+          "document.head.appendChild(st);document.documentElement.style.overflowY='auto';document.body.style.overflowY='auto';"+
+          "}catch(e){}})();";
+        view.evaluateJavascript(js,null);
       }
     });
-
     webView.setOnTouchListener((v,event)->{
-      if(event.getAction()==MotionEvent.ACTION_DOWN || event.getAction()==MotionEvent.ACTION_UP){
-        v.requestFocus();
-      }
+      if(event.getAction()==MotionEvent.ACTION_DOWN || event.getAction()==MotionEvent.ACTION_UP){v.requestFocus();}
       return false;
     });
-
     if(b==null) webView.loadUrl(URL); else webView.restoreState(b);
   }
 
