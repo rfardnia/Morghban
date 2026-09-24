@@ -16,9 +16,11 @@ public class MainActivity extends Activity {
 
   @Override public void onCreate(Bundle b){
     super.onCreate(b);
+
     webView=new WebView(this);
     setContentView(webView);
     fullscreen();
+
     WebSettings s=webView.getSettings();
     s.setJavaScriptEnabled(true);
     s.setDomStorageEnabled(true);
@@ -27,9 +29,39 @@ public class MainActivity extends Activity {
     s.setBuiltInZoomControls(false);
     s.setDisplayZoomControls(false);
     s.setTextZoom(100);
+    s.setLoadWithOverviewMode(false);
+    s.setUseWideViewPort(false);
+
+    webView.setVerticalScrollBarEnabled(true);
+    webView.setHorizontalScrollBarEnabled(false);
+    webView.setOverScrollMode(View.OVER_SCROLL_IF_CONTENT_SCROLLS);
+    webView.setNestedScrollingEnabled(true);
+    webView.setScrollBarStyle(View.SCROLLBARS_INSIDE_OVERLAY);
+
     CookieManager.getInstance().setAcceptCookie(true);
     CookieManager.getInstance().setAcceptThirdPartyCookies(webView,true);
-    webView.setWebViewClient(new WebViewClient());
+
+    webView.setWebViewClient(new WebViewClient(){
+      @Override public void onPageFinished(WebView view,String url){
+        super.onPageFinished(view,url);
+        view.evaluateJavascript(
+          "(function(){"+
+          "try{"+
+          "document.documentElement.style.setProperty('overflow-y','auto','important');"+
+          "document.documentElement.style.setProperty('height','auto','important');"+
+          "document.body.style.setProperty('overflow-y','auto','important');"+
+          "document.body.style.setProperty('height','auto','important');"+
+          "document.body.style.setProperty('min-height','100vh','important');"+
+          "document.body.style.setProperty('touch-action','pan-y','important');"+
+          "var s=document.querySelector('.mobile-native-shell');"+
+          "if(s){s.style.setProperty('overflow-y','visible','important');s.style.setProperty('height','auto','important');}"+
+          "var c=document.querySelector('.mn-content');"+
+          "if(c){c.style.setProperty('overflow','visible','important');c.style.setProperty('height','auto','important');}"+
+          "}catch(e){}"+
+          "})();",null);
+      }
+    });
+
     if(b==null) webView.loadUrl(URL); else webView.restoreState(b);
   }
 
